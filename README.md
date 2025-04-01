@@ -1,4 +1,4 @@
-# Picotron tutorial
+# Picotron tutorial Jean Zay !
 
 A step by step tutorial on how to build [Picotron](https://github.com/huggingface/picotron) distributed training framework form scratch 🔥
 
@@ -11,11 +11,6 @@ A step by step tutorial on how to build [Picotron](https://github.com/huggingfac
 - 🎬 [[Picotron tutorial] Bonus: Debugging Distributed codebase](https://www.youtube.com/watch?v=_8xlRgFY_-g&list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S&index=4)
 - 🎬 [[Picotron tutorial] Part 3: Data Parallel (Naive & Bucket)](https://www.youtube.com/watch?v=k8EpWveM_t4&list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S&index=4)
 
-## Sanity check
-
-- Convergence testing on a Llama 1B on 4096000 tokens to see if loss match.
-
-![](assets/llama1B_sanity_check.png)
 
 ## Jean Zay fork 
 *This fork was build to run on H100 Jean Zay's partition. It could work on A100 with some adjustment*
