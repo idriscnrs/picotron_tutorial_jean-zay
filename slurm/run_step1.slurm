@@ -8,7 +8,7 @@
 #SBATCH --hint=nomultithread 
 
 #SBATCH --constraint=h100 
-#SBATCH --account=sos@h100 
+##SBATCH --account=XXX@h100 
 
 #SBATCH --qos=qos_gpu_h100-dev  
 #SBATCH --time=00:10:00
