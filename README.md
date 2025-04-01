@@ -11,38 +11,55 @@ A step by step tutorial on how to build [Picotron](https://github.com/huggingfac
 - 🎬 [[Picotron tutorial] Bonus: Debugging Distributed codebase](https://www.youtube.com/watch?v=_8xlRgFY_-g&list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S&index=4)
 - 🎬 [[Picotron tutorial] Part 3: Data Parallel (Naive & Bucket)](https://www.youtube.com/watch?v=k8EpWveM_t4&list=PL-_armZiJvAnhcRr6yTJ0__f3Oi-LLi9S&index=4)
 
-## Setup 
-
-```
-conda create -n env-picotron-tutorial python=3.10 --y
-conda activate env-picotron-tutorial
-pip install -e .
-```
-
 ## Sanity check
 
 - Convergence testing on a Llama 1B on 4096000 tokens to see if loss match.
 
 ![](assets/llama1B_sanity_check.png)
 
+## Jean Zay fork 
+*This fork was build to run on H100 Jean Zay's partition. It could work on A100 with some adjustment*
+
+### Setup 
+The support team make things easy, so we got you a great software environnement.
+
+```bash
+module load arch/h100
+module load pytorch-gpu/py3/2.5.0
+```
+
+### idr_torch
+This fork inclute `idr_torch` library to get slurm variable easily.
+
+### Dataset & Model config
+You can't access internet from the compute node.
+We fetch dataset & model direcly from our $DSDIR storage (local).
+
+### Wandb
+You can't access internet from the compute node.
+We disable wandb connectivity.
+```bash
+export WANDB_MODE=offline
+```
+
+### Job submissions
+Jean Zay is using slurm to schedule jobs on the cluster.
+You can find slurm submission scripts in `slurm/` folder.
+The provided script are for H100 partition, you will need an account @h100 to submit your job.
 
 ```bash
 # Basline
-cd step3_dataloader/
-torchrun --nproc_per_node 1 train.py --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 1024 --max_tokens 4096000 --num_proc 16 --model_name TinyLlama/TinyLlama_v1.1 --num_hidden_layers 22 --num_attention_heads 32 --num_key_value_heads 4 --run_name baseline_1B --use_wandb
+sbatch run_step3.slurm
 
 # Tensor Parallel
-cd step4_tensor_parallel/
-torchrun --nproc_per_node 4 train.py --tp_size 4 --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 1024 --max_tokens 4096000 --num_proc 16 --model_name TinyLlama/TinyLlama_v1.1 --num_hidden_layers 22 --num_attention_heads 32 --num_key_value_heads 4 --run_name tp_1B --use_wandb
+sbatch run_step4.slurm
 
 # Data Parallel
-cd step6_data_parallel_bucket/
-torchrun --nproc_per_node 4 train.py --dp_size 4 --micro_batch_size 1 --gradient_accumulation_steps 8 --seq_len 1024 --max_tokens 4096000 --num_proc 16 --model_name TinyLlama/TinyLlama_v1.1 --num_hidden_layers 22 --num_attention_heads 32 --num_key_value_heads 4 --run_name dp_bucket_1B --use_wandb
+sbatch run_step6.slurm
 
 # Pipeline Parallel
-cd step8_pipeline_parallel_1f1b/
-torchrun --nproc_per_node 4 train.py --pp_size 4 --pp_engine 1f1b --micro_batch_size 4 --gradient_accumulation_steps 8 --seq_len 1024 --max_tokens 4096000 --num_proc 16 --model_name TinyLlama/TinyLlama_v1.1 --num_hidden_layers 22 --num_attention_heads 32 --num_key_value_heads 4 --run_name pp_1f1b_1B --use_wandb
+sbatch run_step8.slurm
 
 # 3D parallelism (Tensor + Data + Pipeline parallel)
-torchrun --nproc_per_node 8 train.py --tp_size 2 --pp_size 2 --pp_engine 1f1b --dp_size 2 --micro_batch_size 2 --gradient_accumulation_steps 8 --seq_len 1024 --max_tokens 4096000 --num_proc 16 --model_name TinyLlama/TinyLlama_v1.1 --num_hidden_layers 22 --num_attention_heads 32 --num_key_value_heads 4 --run_name 3D_parallelism_1B --use_wandb
+sbatch run_step9.slurm
 ```

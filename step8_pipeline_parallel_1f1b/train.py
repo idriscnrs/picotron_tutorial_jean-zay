@@ -23,6 +23,7 @@ from utils import set_all_seed, print, to_readable_format
 from tensor_parallel import apply_tensor_parallel
 from pipeline_parallel import PipelineParallel, train_step_pipeline_afab, train_step_pipeline_1f1b
 from data_parallel import DataParallelBucket
+import idr_torch
 
 def all_reduce_loss_across_dp_ranks(loss, device):
     reduced_loss = torch.tensor([loss if loss is not None else 0.0], dtype=torch.float32, device=device)
@@ -69,13 +70,13 @@ if __name__ == "__main__":
     parser.add_argument("--tokenizers_parallelism", type=str, default="false")
 
     # Model arguments
-    parser.add_argument("--model_name", type=str, default="HuggingFaceTB/SmolLM-360M-Instruct")
+    parser.add_argument("--model_name", type=str, default=str(os.environ['DSDIR'])+"/HuggingFace_Models/"+"HuggingFaceTB/SmolLM-360M-Instruct")
     parser.add_argument("--num_hidden_layers", type=int, default=32)
     parser.add_argument("--num_attention_heads", type=int, default=16)
     parser.add_argument("--num_key_value_heads", type=int, default=4)
 
     # Dataset arguments
-    parser.add_argument("--dataset_name", type=str, default="roneneldan/TinyStories")
+    parser.add_argument("--dataset_name", type=str, default=str(os.environ['DSDIR'])+"/HuggingFace/roneneldan/TinyStories")
     parser.add_argument("--num_workers", type=int, default=1)
     parser.add_argument("--num_proc", type=int, default=4)
 
@@ -104,9 +105,9 @@ if __name__ == "__main__":
     os.environ["TOKENIZERS_PARALLELISM"] = args.tokenizers_parallelism
     os.environ["DEVICE"] = "cuda"
     
-    local_rank = int(os.environ["LOCAL_RANK"])
-    global_rank = int(os.environ["RANK"])
-    world_size = int(os.environ["WORLD_SIZE"])
+    local_rank = idr_torch.local_rank #int(os.environ["LOCAL_RANK"])
+    global_rank = idr_torch.rank #int(os.environ["RANK"])
+    world_size = idr_torch.world_size #int(os.environ["WORLD_SIZE"])
     backend = "nccl"
     torch.cuda.set_device(local_rank)
     device = torch.device("cuda", local_rank)
